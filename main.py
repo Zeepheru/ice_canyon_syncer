@@ -13,6 +13,12 @@ add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.I
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
 
+    def btf(list_folders):
+        new_list = []
+        for a in list_folders:
+            new_list.append("\\{}\\".format(a))
+        return new_list
+
     def createallfolders(root,filepath):
         only_folders = re.search(r".*(?=\\)", filepath).group()
 
@@ -67,7 +73,7 @@ For confirmation, the sync source path is {} and the destination path is {}. (y/
 Folders to be synced perfectly (if file sizes are different): {}
 Folders to be synced with addition of files to dst: {}
 """.format(
-    str(perfect_sync_folders)[1:-1].replace("'",''), str(add_sync_folders)[1:-1].replace("'",'')
+    str(btf(perfect_sync_folders))[1:-1].replace("'",''), str(btf(add_sync_folders))[1:-1].replace("'",'')
     ))
 
 
@@ -79,7 +85,7 @@ Folders to be synced with addition of files to dst: {}
             missing_folders.append(folder)
         
     if missing_folders != []:
-        print("Folders: "+ str(missing_folders)[1:-1].replace("'",'') + " are not found in source directory.\n")
+        print("Folders: "+ str(btf(missing_folders))[1:-1].replace("'",'') + " are not found in source directory.\n")
 
 
     ignored_folders = []
@@ -91,7 +97,7 @@ Folders to be synced with addition of files to dst: {}
                 ignored_folders.append(folder_actual)
         
     if ignored_folders != []:
-        print("Folders: "+ str(ignored_folders)[1:-1].replace("'",'') + " will not be synced.\n")
+        print("Folders: "+ str(btf(ignored_folders))[1:-1].replace("'",'') + " will not be synced.\n")
 
     for root, dirs, files in os.walk(src_path):
         for f in files:
