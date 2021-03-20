@@ -107,15 +107,18 @@ Folders to be synced with addition of files to dst: {}
                 if file_folder in perfect_sync_folders:
                     if os.path.exists(dst_file_path):
                         if os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
-                            os.remove(dst_file_path)
+                            print("Syncing {}".format(relative_path))
+                            createallfolders(dst_path, relative_path)
+                            shutil.copy(src_file_path, dst_file_path)
+                            os.remove(src_file_path)
                         else:
                             break
                     else:
-                        pass
+                        print("Syncing {}".format(relative_path))
+                        createallfolders(dst_path, relative_path)
+                        shutil.copy(src_file_path, dst_file_path)
 
-                    print("Syncing {}".format(relative_path))
-                    createallfolders(dst_path, relative_path)
-                    shutil.copy(src_file_path, dst_file_path)
+                    
 
                 if file_folder in add_sync_folders:
                     if not os.path.exists(dst_file_path):
