@@ -7,6 +7,9 @@ global src_path, dst_path, perfect_sync_folders, add_sync_folders
 src_path = r'C:\Users\chang\Documents\Temp Brownie'
 dst_path = r'F:\Temp Brownie'
 
+
+#FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
+
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer"]
 add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"]
 
@@ -16,7 +19,7 @@ def main():
     def btf(list_folders):
         new_list = []
         for a in list_folders:
-            new_list.append("\\{}\\".format(a))
+            new_list.append("\\{}\\".format(a)[1:-1])
         return new_list
 
     def createallfolders(root,filepath):
@@ -65,7 +68,7 @@ For confirmation, the sync source path is {} and the destination path is {}. (y/
 
     if not os.path.exists(dst_path):
         os.mkdir(dst_path)
-        print('Destination directory {} created'.format(dst_path))
+        print('Destination directory {} created.'.format(dst_path))
 
     ##Actual copier code
     print("""Syncing Ice Canyon Files...
