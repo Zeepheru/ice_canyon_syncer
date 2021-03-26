@@ -4,14 +4,14 @@ import shutil
 
 ### path vars
 global src_path, dst_path, perfect_sync_folders, add_sync_folders
-src_path = r'C:\Users\chang\Documents\Temp Brownie'
-dst_path = r'F:\Temp Brownie'
+src_path = r'E:\Temp Brownie (to Sync)'
+dst_path = r'C:\Users\sanpee\Documents\Temp Brownie'
 
 
 #FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
 
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer"]
-add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"]
+add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"] #Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
@@ -23,23 +23,41 @@ def main():
         return new_list
 
     def createallfolders(root,filepath):
-        only_folders = re.search(r".*(?=\\)", filepath).group()
+        if "\\" in filepath:
+            only_folders = re.search(r".*(?=\\)", filepath).group()
 
-        if not os.path.exists(os.path.join(root,only_folders)):
-            if "\\" not in only_folders:
-                current_folder = os.path.join(root,only_folders)
-                if not os.path.exists(current_folder):
-                    os.mkdir(current_folder)
-
-            else:
-                all_folders = re.findall(r'^.*?(?=\\)|(?<=\\).*?(?=\\)|(?<=\\).+$',only_folders)
-                current_folder = root
-
-                for folder in all_folders:
-                    current_folder = os.path.join(current_folder,folder)
+            if not os.path.exists(os.path.join(root,only_folders)):
+                if "\\" not in only_folders:
+                    current_folder = os.path.join(root,only_folders)
                     if not os.path.exists(current_folder):
-                        #print("CREATING "+current_folder)
                         os.mkdir(current_folder)
+
+                else:
+                    all_folders = re.findall(r'^.*?(?=\\)|(?<=\\).*?(?=\\)|(?<=\\).+$',only_folders)
+                    current_folder = root
+
+                    for folder in all_folders:
+                        current_folder = os.path.join(current_folder,folder)
+                        if not os.path.exists(current_folder):
+                            #print("CREATING "+current_folder)
+                            os.mkdir(current_folder)
+
+    def perfect_sync(src_file_path, dst_file_path):
+        #Needs a delete in dst if not in src function as well.
+
+        if os.path.exists(dst_file_path):
+            #print(f, str(os.stat(src_file_path).st_size), str(os.stat(dst_file_path).st_size))
+            if os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
+                print("Syncing {} (Different File Sizes)".format(relative_path))
+                createallfolders(dst_path, relative_path)
+                shutil.copy(src_file_path, dst_file_path)
+                os.remove(src_file_path)
+            else:
+                pass
+        else:
+            print("Syncing {}".format(relative_path))
+            createallfolders(dst_path, relative_path)
+            shutil.copy(src_file_path, dst_file_path)
 
     input1  = input("""Ice Canyon Syncer script.
 For confirmation, the sync source path is {} and the destination path is {}. (y/n)""".format(
@@ -104,50 +122,34 @@ Folders to be synced with addition of files to dst: {}
 
     for root, dirs, files in os.walk(src_path):
         for f in files:
-            src_file_path = os.path.join(root,f)
-            relative_path = src_file_path.replace(src_path,"")[1:]
-            dst_file_path = os.path.join(dst_path,relative_path)
+            if f != "Thumbs.db":
+                src_file_path = os.path.join(root,f)
+                relative_path = src_file_path.replace(src_path,"")[1:]
+                dst_file_path = os.path.join(dst_path,relative_path)
 
-            file_folder = re.search(r'.*?(?=\\)',relative_path)
-            if file_folder != None:
-                
-                file_folder = file_folder.group()
+                file_folder = re.search(r'.*?(?=\\)',relative_path)
+                if file_folder != None:
+                    
+                    file_folder = file_folder.group()
+                    #print(f, file_folder)
 
-                if file_folder in perfect_sync_folders:
-                    if os.path.exists(dst_file_path):
-                        if os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
-                            os.remove(dst_file_path)
-                        else:
-                            break
-                    else:
-                        pass
+                    if file_folder in perfect_sync_folders:
+                        perfect_sync(src_file_path, dst_file_path)
 
-                    print("Syncing {}".format(relative_path))
-                    createallfolders(dst_path, relative_path)
-                    shutil.copy(src_file_path, dst_file_path)
+                    if file_folder in add_sync_folders:
+                        if not os.path.exists(dst_file_path):
+                            print("Syncing {}".format(relative_path))
 
-                if file_folder in add_sync_folders:
-                    if not os.path.exists(dst_file_path):
-                        print("Syncing {}".format(relative_path))
+                            createallfolders(dst_path, relative_path)
+                            
+                            shutil.copy(src_file_path, dst_file_path)
 
-                        createallfolders(dst_path, relative_path)
-                        
-                        shutil.copy(src_file_path, dst_file_path)
-
-            else:
-                if "root" in add_sync_folders:
-                    pass #NOT NEEDED, will never need
-                elif "root" in perfect_sync_folders:
-                    if os.path.exists(dst_file_path):
-                        if os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
-                            os.remove(dst_file_path)
-                        else:
-                            break
-                    else:
-                        pass
-
-                    print("Syncing {}".format(relative_path))
-                    shutil.copy(src_file_path, dst_file_path)
+                else:
+                    #print(f)
+                    if "root" in add_sync_folders:
+                        pass #NOT NEEDED, will never need
+                    elif "root" in perfect_sync_folders:
+                        perfect_sync(src_file_path, dst_file_path)
                     
 
     input("Syncing completed.")
