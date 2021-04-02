@@ -4,8 +4,8 @@ import shutil
 
 ### path vars
 global src_path, dst_path, perfect_sync_folders, add_sync_folders
-src_path = r'E:\Temp Brownie (to Sync)'
-dst_path = r'C:\Users\sanpee\Documents\Temp Brownie'
+src_path = r'C:\Users\chang\Documents\Temp Brownie'
+dst_path = r'F:\Temp Brownie (Thumbdrive Version)'
 
 
 #FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
