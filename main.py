@@ -51,7 +51,7 @@ def main():
                 print("Syncing {} (Different File Sizes)".format(relative_path))
                 createallfolders(dst_path, relative_path)
                 shutil.copy(src_file_path, dst_file_path)
-                os.remove(src_file_path)
+                #os.remove(src_file_path) #WHY THE F IS THIS HERE?????
             else:
                 pass
         else:
