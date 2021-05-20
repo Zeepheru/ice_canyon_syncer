@@ -10,8 +10,22 @@ dst_path = r'F:\Temp Brownie (Thumbdrive Version)'
 
 #FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
 
+folder_options = [
+    {
+    "name":"IC Default (Peg) -> IC Thumb",
+    "src":r'C:\Users\chang\Documents\Temp Brownie',
+    "dst":r'F:\Temp Brownie (Thumbdrive Version)'
+    },
+    {
+    "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
+    "src":r'E:\Temp Brownie (Thumbdrive Version)',
+    "dst":r'D:'
+    },
+]
+
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer"]
-add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"] #Probably need the in progress folders as well.
+add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"
+,"Ice Canyon Books","IMCOPLETE, REVISIT","Char Collages","converted_sketches"] #Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
@@ -59,11 +73,39 @@ def main():
             createallfolders(dst_path, relative_path)
             shutil.copy(src_file_path, dst_file_path)
 
+    #creating the 
+    options_text = ""
+    for i, option in enumerate(folder_options):
+        i += 1
+        options_text += "   {} - {}\n".format(i, option["name"])
+
+    ##
+
     input1  = input("""Ice Canyon Syncer script.
-For confirmation, the sync source path is {} and the destination path is {}. (y/n)""".format(
-    src_path, dst_path
+Main Directory Options:
+{}
+If a manual entry is required, enter (n):
+""".format(
+    options_text
     ))
-    if input1 != "y":
+    default_dir_options = False
+    try:
+        int(input1)
+        if default_dir_options <= + len(folder_options):
+            default_dir_options = True
+        else:
+            pass
+    except:
+        pass
+    
+    #actual dir shutfff
+    if default_dir_options:
+        input1 = int(input1)
+
+        src_path = folder_options[input1-1]["src"]
+        dst_path = folder_options[input1-1]["dst"]
+
+    else:
         src, dst  = False, False
         while src == False:
             src_path = input("Change source path: ")
@@ -90,10 +132,13 @@ For confirmation, the sync source path is {} and the destination path is {}. (y/
 
     ##Actual copier code
     print("""Syncing Ice Canyon Files...
+    From: {}
+    To: {}
     
 Folders to be synced perfectly (if file sizes are different): {}
 Folders to be synced with addition of files to dst: {}
 """.format(
+    src_path, dst_path,
     str(btf(perfect_sync_folders))[1:-1].replace("'",''), str(btf(add_sync_folders))[1:-1].replace("'",'')
     ))
 
