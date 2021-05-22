@@ -19,7 +19,7 @@ folder_options = [
     {
     "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
     "src":r'E:\Temp Brownie (Thumbdrive Version)',
-    "dst":r'D:'
+    "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
     },
 ]
 
