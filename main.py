@@ -21,6 +21,11 @@ folder_options = [
     "src":r'E:\Temp Brownie (Thumbdrive Version)',
     "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
     },
+    {
+    "name":"IC Backup (Uc-Narwhal) -> IC Backup2 (Uc-Brownie)",
+    "src":r'I:\Backup\Pony\MLP\Ice Canyon Backup',
+    "dst":r'P:\MLP\Ice Canyon Backup'
+    },
 ]
 
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer"]
@@ -78,8 +83,7 @@ def main():
     for i, option in enumerate(folder_options):
         i += 1
         options_text += "   {} - {}\n".format(i, option["name"])
-
-    ##
+        ##
 
     input1  = input("""Ice Canyon Syncer script.
 Main Directory Options:
