@@ -17,6 +17,11 @@ folder_options = [
     "dst":r'F:\Temp Brownie (Thumbdrive Version)'
     },
     {
+    "name":"IC Default (Peg) -> IC Backup (Peg)",
+    "src":r'C:\Users\chang\Documents\Temp Brownie',
+    "dst":r'D:\Brownie\My Little Pony\Ice Canyon Backup'
+    },
+    {
     "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
     "src":r'E:\Temp Brownie (Thumbdrive Version)',
     "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
@@ -28,9 +33,9 @@ folder_options = [
     },
 ]
 
-perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer"]
-add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS","IC-","ImR Temp 11","Ref.IC"
-,"Ice Canyon Books","IMCOPLETE, REVISIT","Char Collages","converted_sketches"] #Probably need the in progress folders as well.
+perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer","References"]
+add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS"
+,"IMCOPLETE, REVISIT"] #Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
