@@ -35,7 +35,7 @@ folder_options = [
 
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer","References"]
 add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS"
-,"IMCOPLETE, REVISIT"] #Probably need the in progress folders as well.
+,"Revisits","Practice","Milky Milk Milk"] #Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
@@ -70,8 +70,13 @@ def main():
         #Needs a delete in dst if not in src function as well.
 
         if os.path.exists(dst_file_path):
+            if not os.path.exists(src_file_path):
+                #untested lol
+                print("Removing {} from dst.".format(relative_path))
+                os.remove(src_file_path)
+
             #print(f, str(os.stat(src_file_path).st_size), str(os.stat(dst_file_path).st_size))
-            if os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
+            elif os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
                 print("Syncing {} (Different File Sizes)".format(relative_path))
                 createallfolders(dst_path, relative_path)
                 shutil.copy(src_file_path, dst_file_path)
