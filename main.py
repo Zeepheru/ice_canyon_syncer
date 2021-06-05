@@ -35,7 +35,7 @@ folder_options = [
 
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer","References"]
 add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS"
-,"Revisits","Practice","Milky Milk Milk"] #Probably need the in progress folders as well.
+,"Revisit","Practice","Milky Milk Milk"] #Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
@@ -73,7 +73,7 @@ def main():
             if not os.path.exists(src_file_path):
                 #untested lol
                 print("Removing {} from dst.".format(relative_path))
-                os.remove(src_file_path)
+                os.remove(dst_file_path)
 
             #print(f, str(os.stat(src_file_path).st_size), str(os.stat(dst_file_path).st_size))
             elif os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
@@ -208,6 +208,27 @@ Folders to be synced with addition of files to dst: {}
                     if "root" in add_sync_folders:
                         pass #NOT NEEDED, will never need
                     elif "root" in perfect_sync_folders:
+                        perfect_sync(src_file_path, dst_file_path)
+
+    #removalcode
+    for root, dirs, files in os.walk(dst_path):
+        for f in files:
+            if f != "Thumbs.db":
+                dst_file_path = os.path.join(root,f)
+                relative_path = dst_file_path.replace(dst_path,"")[1:]
+                src_file_path = os.path.join(src_path,relative_path)
+
+                file_folder = re.search(r'.*?(?=\\)',relative_path)
+                if file_folder != None:
+                    
+                    file_folder = file_folder.group()
+                    #print(f, file_folder)
+
+                    if file_folder in perfect_sync_folders:
+                        perfect_sync(src_file_path, dst_file_path)
+
+                else:
+                    if "root" in perfect_sync_folders:
                         perfect_sync(src_file_path, dst_file_path)
                     
 
