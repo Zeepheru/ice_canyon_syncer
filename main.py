@@ -23,7 +23,7 @@ folder_options = [
     },
     {
     "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
-    "src":r'E:\Temp Brownie (Thumbdrive Version)',
+    "src":r'G:\Temp Brownie (Thumbdrive Version)',
     "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
     },
     {
@@ -99,12 +99,14 @@ def main():
 Main Directory Options:
 {}
 If a manual entry is required, enter (n):
+
+[-d] to remove all files from dst.
 """.format(
     options_text
     ))
     default_dir_options = False
     try:
-        int(input1)
+        int(input1[:1])
         if default_dir_options <= + len(folder_options):
             default_dir_options = True
         else:
@@ -114,11 +116,25 @@ If a manual entry is required, enter (n):
     
     #actual dir shutfff
     if default_dir_options:
-        input1 = int(input1)
+        if "-d" in input1:
+            remove_dst = True
+        else:
+            remove_dst = False
+
+        input1 = int(input1[:1])
 
         src_path = folder_options[input1-1]["src"]
         dst_path = folder_options[input1-1]["dst"]
 
+        ## Removing files from dst
+        if remove_dst:
+            print("Removing files from [{}].".format(dst_path))
+            for root, dirs, files in os.walk(dst_path):
+                for f in files:
+                    try:
+                        os.remove(os.path.join(root, f))
+                    except:
+                        pass
     else:
         src, dst  = False, False
         while src == False:
