@@ -1,12 +1,13 @@
 import os
 import re
 import shutil
+import time
 
 ### path vars
-global src_path, dst_path, perfect_sync_folders, add_sync_folders
+global src_path, dst_path, perfect_sync_folders, add_sync_folders, start_time
 src_path = r'C:\Users\chang\Documents\Temp Brownie'
 dst_path = r'F:\Temp Brownie (Thumbdrive Version)'
-
+start_time = time.time()
 
 #FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
 
@@ -32,6 +33,19 @@ folder_options = [
     "dst":r'P:\MLP\Ice Canyon Backup'
     },
 ]
+
+def return_time_from_seconds(t):
+    hrs = int(t / 3600)
+    t = t % 3600 
+    mins = int(t / 60)
+    t = t % 60
+    secs = t
+    if hrs != 0:
+        return "{} hrs, {} mins, {:.03f} s".format(hrs, mins, secs)
+    elif mins != 0:
+        return "{} mins, {:.03f} s".format(mins, secs)
+    else:
+        return "{:.03f} s".format(secs)
 
 perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer","References"]
 add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS"
@@ -72,19 +86,19 @@ def main():
         if os.path.exists(dst_file_path):
             if not os.path.exists(src_file_path):
                 #untested lol
-                print("Removing {} from dst.".format(relative_path))
+                print("Removing [{}] from dst.".format(relative_path))
                 os.remove(dst_file_path)
 
             #print(f, str(os.stat(src_file_path).st_size), str(os.stat(dst_file_path).st_size))
             elif os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
-                print("Syncing {} (Different File Sizes)".format(relative_path))
+                print("Copying [{}] (Different File Sizes)".format(relative_path))
                 createallfolders(dst_path, relative_path)
                 shutil.copy(src_file_path, dst_file_path)
                 #os.remove(src_file_path) #WHY THE F IS THIS HERE?????
             else:
                 pass
         else:
-            print("Syncing {}".format(relative_path))
+            print("Copying [{}]".format(relative_path))
             createallfolders(dst_path, relative_path)
             shutil.copy(src_file_path, dst_file_path)
 
@@ -135,19 +149,19 @@ If a manual entry is required, enter (n):
             try:
                 if not os.path.exists(dst_path):
                     os.mkdir(dst_path)
-                    print('Destination directory {} created'.format(dst_path))
+                    print('Destination directory [{}] created'.format(dst_path))
                 dst = True
             except:
                 print("Destination path is not valid.")
 
     if not os.path.exists(dst_path):
         os.mkdir(dst_path)
-        print('Destination directory {} created.'.format(dst_path))
+        print('Destination directory [{}] created.'.format(dst_path))
 
     ##Actual copier code
     print("""Syncing Ice Canyon Files...
-    From: {}
-    To: {}
+    From: [{}]
+    To: [{}]
     
 Folders to be synced perfectly (if file sizes are different): {}
 Folders to be synced with addition of files to dst: {}
@@ -197,7 +211,7 @@ Folders to be synced with addition of files to dst: {}
 
                     if file_folder in add_sync_folders:
                         if not os.path.exists(dst_file_path):
-                            print("Syncing {}".format(relative_path))
+                            print("Copying [{}]".format(relative_path))
 
                             createallfolders(dst_path, relative_path)
                             
@@ -232,8 +246,7 @@ Folders to be synced with addition of files to dst: {}
                         perfect_sync(src_file_path, dst_file_path)
                     
 
-    input("Syncing completed.")
-
-
 if __name__ == "__main__":
     main()
+    print(return_time_from_seconds(time.time() - start_time))
+    input("Syncing completed.")
