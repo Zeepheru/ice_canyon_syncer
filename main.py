@@ -5,8 +5,8 @@ import time
 
 ### path vars
 global src_path, dst_path, perfect_sync_folders, add_sync_folders, start_time
-src_path = r'C:\Users\chang\Documents\Temp Brownie'
-dst_path = r'F:\Temp Brownie (Thumbdrive Version)'
+src_path = r'C:\Users\chang\Documents\Ice Canyon'
+dst_path = r'F:\Ice Canyon (Thumbdrive Version)'
 start_time = time.time()
 
 #FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
@@ -14,17 +14,17 @@ start_time = time.time()
 folder_options = [
     {
     "name":"IC Default (Peg) -> IC Thumb",
-    "src":r'C:\Users\chang\Documents\Temp Brownie',
-    "dst":r'F:\Temp Brownie (Thumbdrive Version)'
+    "src":r'C:\Users\chang\Documents\Ice Canyon',
+    "dst":r'F:\Ice Canyon (Thumbdrive Version)'
     },
     {
     "name":"IC Default (Peg) -> IC Backup (Peg)",
-    "src":r'C:\Users\chang\Documents\Temp Brownie',
+    "src":r'C:\Users\chang\Documents\Ice Canyon',
     "dst":r'D:\Brownie\My Little Pony\Ice Canyon Backup'
     },
     {
     "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
-    "src":r'G:\Temp Brownie (Thumbdrive Version)',
+    "src":r'G:\Ice Canyon (Thumbdrive Version)',
     "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
     },
     {
@@ -47,9 +47,24 @@ def return_time_from_seconds(t):
     else:
         return "{:.03f} s".format(secs)
 
-perfect_sync_folders = ["root","Chocolate","Circles","crits","Griffons","NICE STUFF","Reindeer","References"]
-add_sync_folders = ["HERE ARE SOME FECKING TUTORIALS"
-,"Revisit","Practice","Milky Milk Milk"] #Probably need the in progress folders as well.
+perfect_sync_folders = [
+    "root",
+    "Chocolate",
+    "Circles",
+    "crits",
+    "Griffons",
+    "Reindeer",
+    "[Export]",
+    "[Works]",
+    "[References]"
+    ]
+add_sync_folders = [
+    "HERE ARE SOME FECKING TUTORIALS",
+    "Revisit",
+    "Practice",
+    "Milky Milk Milk"
+    ] 
+#Probably need the in progress folders as well.
 
 def main():
     global src_path, dst_path, perfect_sync_folders, add_sync_folders
