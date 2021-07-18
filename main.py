@@ -59,7 +59,6 @@ perfect_sync_folders = [
     "[References]"
     ]
 add_sync_folders = [
-    "HERE ARE SOME FECKING TUTORIALS",
     "Revisit",
     "Practice",
     "Milky Milk Milk"
