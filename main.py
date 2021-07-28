@@ -61,7 +61,7 @@ perfect_sync_folders = [
 add_sync_folders = [
     "Revisit",
     "Practice",
-    "Milky Milk Milk"
+    "Milk"
     ] 
 #Probably need the in progress folders as well.
 
