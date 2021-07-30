@@ -56,13 +56,14 @@ perfect_sync_folders = [
     "Reindeer",
     "[Export]",
     "[Works]",
-    "[References]"
+    "[References]",
+    "Milk",
+    "Revisit",
+    "Practice"
     ]
 add_sync_folders = [
-    "Revisit",
-    "Practice",
-    "Milk"
-    ] 
+    ] # now gonna be deprecated. LMAO
+
 #Probably need the in progress folders as well.
 
 def main():
@@ -124,6 +125,9 @@ def main():
         ##
 
     input1  = input("""Ice Canyon Syncer script.
+
+[Folders aren't explicitly synced right now btw, so please do that when you have the "energy" to do so.]
+
 Main Directory Options:
 {}
 If a manual entry is required, enter (n):
