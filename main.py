@@ -14,12 +14,12 @@ start_time = time.time()
 folder_options = [
     {
     "name":"IC Default (Peg) -> IC Thumb",
-    "src":r'C:\Users\chang\Documents\Ice Canyon',
+    "src":r'C:\Projects\Ice Canyon',
     "dst":r'F:\Ice Canyon (Thumbdrive Version)'
     },
     {
     "name":"IC Default (Peg) -> IC Backup (Peg)",
-    "src":r'C:\Users\chang\Documents\Ice Canyon',
+    "src":r'C:\Projects\Ice Canyon',
     "dst":r'D:\Brownie\My Little Pony\Ice Canyon Backup'
     },
     {
