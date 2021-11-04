@@ -126,7 +126,8 @@ def checkDir(folder_path):
                 # ignoring ignored files
                 continue
             filepath = os.path.join(root, f)
-            FILES[filepath.replace(folder_path,"")[1:]] = os.path.getmtime(filepath)
+            FILES[filepath.replace(folder_path,"")[1:]] = (os.path.getmtime(filepath), os.stat(filepath).st_size)
+            # for the file tuple: (time of creation, size in bytes)
 
     return ROOTS, FILES
 
@@ -173,7 +174,7 @@ def main():
 
     roots_to_remove = []
     roots_to_add = []
-    files_to_copy, files_to_remove = [], []
+    files_to_copy, files_to_remove = {}, []
 
     # folders to add to dst
     for src_root in src_roots:
@@ -188,14 +189,12 @@ def main():
     # Files to copy/overwrite from src to dst.
     for src_file in list(src_files):
         if src_file in list(dst_files):
-            if src_files[src_file] == dst_files[src_file]:
+            if src_files[src_file][0] == dst_files[src_file][0]:
                 continue
             else:
-                files_to_copy.append(src_file)
+                files_to_copy[src_file] = byteConverter(src_files[src_file][1])
         else:
-            files_to_copy.append(src_file)
-
-    
+            files_to_copy[src_file] = byteConverter(src_files[src_file][1])
 
     # Files to remove from dst.
     for dst_file in list(dst_files):
@@ -242,7 +241,7 @@ def main():
             console.print(err, style="bold red")
             input("Press enter to continue.")
 
-    for file in files_to_copy:
+    for file in list(files_to_copy):
         try:
             # Remove, then copies file.
             if not debug:
@@ -251,7 +250,7 @@ def main():
                     os.remove(full_dst_path)
                 shutil.copy(full_src_path, full_dst_path)
 
-            console.print("Copied file: [gray]{}".format(file))
+            console.print("Copied file: [gray]{}   [{}]".format(file, files_to_copy[file]))
 
         except Exception as err:
             console.print(err, style="bold red")

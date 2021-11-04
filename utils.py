@@ -36,6 +36,23 @@ def timeInSeconds(t):
     else:
         return "{:.03f} s".format(secs)
 
+def byteConverter(size):
+    ext = "B"
+    if size/1000 > 1:
+        size = size/1000
+        size = int(size)
+        ext = "kB"
+        if size/1000 > 1:
+            size = size/1000
+            ext = "MB"
+            if size/1000 > 1:
+                size = size/1000
+                size = "{0:.2f}".format(size)
+                ext = "GB"
+            else:
+                size = "{0:.2f}".format(size)
+    return str(size) +" "+ ext
+
 def dumpJson(data):
     return json.dumps(data, indent=4, sort_keys=True)
 
