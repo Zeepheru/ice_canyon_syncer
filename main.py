@@ -276,7 +276,7 @@ def main():
         writePickle(os.path.join(dst_path, config["history filename"]), data=src_files)
 
     ### End of script
-    console.print("Time elapsed: {}".format(timeInSeconds(time.time() - start_time)))
+    console.print("\nTime elapsed: {}".format(timeInSeconds(time.time() - start_time)))
 
     if not debug:
         input("Syncing complete. Press enter to close.")
