@@ -2,285 +2,288 @@ import os
 import re
 import shutil
 import time
+import socket
+from rich import style
 
-### path vars
-global src_path, dst_path, perfect_sync_folders, add_sync_folders, start_time
-src_path = r'C:\Users\chang\Documents\Ice Canyon'
-dst_path = r'F:\Ice Canyon (Thumbdrive Version)'
-start_time = time.time()
+from rich.console import Console
 
-#FILE SIZE CODE DOESNT SEEM TO WORK AT THE MOMENT
+import tqdm
 
-folder_options = [
-    {
-    "name":"IC Default (Peg) -> IC Thumb",
-    "src":r'C:\Projects\Ice Canyon',
-    "dst":r'F:\Ice Canyon (Thumbdrive Version)'
-    },
-    {
-    "name":"IC Default (Peg) -> IC Backup (Peg)",
-    "src":r'C:\Projects\Ice Canyon',
-    "dst":r'D:\Brownie\My Little Pony\Ice Canyon Backup'
-    },
-    {
-    "name":"IC Thumb -> IC Backup (Uc-Narwhal)",
-    "src":r'G:\Ice Canyon (Thumbdrive Version)',
-    "dst":r'I:\Backup\Pony\MLP\Ice Canyon Backup'
-    },
-    {
-    "name":"IC Backup (Uc-Narwhal) -> IC Backup2 (Uc-Brownie)",
-    "src":r'I:\Backup\Pony\MLP\Ice Canyon Backup',
-    "dst":r'P:\MLP\Ice Canyon Backup'
-    },
-]
+from utils import * 
+from write_config import viewConfigs, runThis
 
-def return_time_from_seconds(t):
-    hrs = int(t / 3600)
-    t = t % 3600 
-    mins = int(t / 60)
-    t = t % 60
-    secs = t
-    if hrs != 0:
-        return "{} hrs, {} mins, {:.03f} s".format(hrs, mins, secs)
-    elif mins != 0:
-        return "{} mins, {:.03f} s".format(mins, secs)
-    else:
-        return "{:.03f} s".format(secs)
+"""
+Notes
 
-perfect_sync_folders = [
-    "root",
-    "Chocolate",
-    "Circles",
-    "crits",
-    "Griffons",
-    "Reindeer",
-    "[Export]",
-    "[Works]",
-    "[References]",
-    "Milk",
-    "Revisit",
-    "Practice"
-    ]
-add_sync_folders = [
-    ] # now gonna be deprecated. LMAO
+socket.gethostname() 
+Two options
+ZEEE... -> PEG
+or SANPEE... -> UC
 
-#Probably need the in progress folders as well.
+For PEG
+Primarily it's from 
+
+"""
+
+## SETUP VARS !! 
+debug = False
+# Debug means disabling all OS operations: file and folder copying, history .pkl file creation
+
+## Stuff
+def loadConfig():
+    global config
+    config = loadPickle(r'config.pkl') 
+
+def loadPathPresets(host = "peg", n=0):
+    # Defaults are peg and preset 0.
+    # LAZY TO WRITE ERROR CODE.
+
+    src_n = config["path presets"][host][n][1]
+    dst_n = config["path presets"][host][n][2]
+
+    src_path = config["paths"][host][src_n]
+    dst_path = config["paths"][host][dst_n]
+
+    return src_path, dst_path
+
+def createBaseRegexes():
+    global ignored_folders_regex, ignored_files_regex
+    ignored_folders_regex = re.compile(config["ignored folders"])
+    ignored_files_regex = re.compile(config["ignored files"])
+
+    #ignored_folders_regex = re.compile(r'|'.join('$'+str(a) for a in config["ignored folders"]))
+    #ignored_files_regex = re.compile(r'|'.join('$'+str(a) for a in config["ignored files"]))
+
+## Real code
+
+def consoleInput():
+    #host names and stuff
+    hostname = socket.gethostname()
+    host = ""
+    for options in config["hostnames"]:
+        if re.search(options[0], hostname) != None:
+            host = options[1]
+            break
+
+    # No host auto-identified
+    if host == "":
+        print("No host has been autoidentified.")
+        while True:
+            h = input("Please manually enter the host (peg/uc): ")
+            if h.lower() == "peg":
+                host = "peg"
+                break
+            elif h.lower() == "uc":
+                host = "uc"
+                break
+            else:
+                "Please try again."
+    print("Host PC has been identified as '{}'.".format(host))
+    
+    ## showing the options for presets
+    presetText = """"""
+    for i, preset in enumerate(config["path presets"][host]):
+        presetText += """Preset {} | {}
+Source: {},
+Destination: {}
+
+""".format(
+    i + 1, preset[0],
+    config["paths"][host][preset[1]],
+    config["paths"][host][preset[2]]
+    )
+    print(presetText)
+
+    max_n = len(config["path presets"][host])
+    # print(max_n)
+    while True:
+        try:
+            n = int(input("Please enter the preset: ")) - 1
+            if 0 <= n < max_n:
+                break
+            print("Invalid preset.")
+        except Exception as e:
+            print("Invalid preset.", e)
+
+    return host, n
+
+def checkDir(folder_path):
+    # NO longer a "check" function lmao.
+    # The darker blue syntax highlighting is nice, I'll just keep that. :-P
+
+    ROOTS = []
+    FILES = {}
+    for root, dirs, files in os.walk(folder_path):
+        root_relative = root.replace(folder_path,"")[1:]
+        if ignored_folders_regex.search(root_relative) != None:
+            # Ignoring ignored folders
+            continue
+        ROOTS.append(root_relative)
+        # maybe do a ROOT CHECK FIRST?
+
+        for f in files:
+            if ignored_files_regex.search(f) != None:
+                # ignoring ignored files
+                continue
+            filepath = os.path.join(root, f)
+            FILES[filepath.replace(folder_path,"")[1:]] = os.path.getmtime(filepath)
+
+    return ROOTS, FILES
 
 def main():
-    global src_path, dst_path, perfect_sync_folders, add_sync_folders
+    ## For Rich
+    global console
+    console = Console()
 
-    def btf(list_folders):
-        new_list = []
-        for a in list_folders:
-            new_list.append("\\{}\\".format(a)[1:-1])
-        return new_list
+    # Debug warning
+    if debug:
+        console.print("DEBUG IS ENABLED.", style="bold yellow")
 
-    def createallfolders(root,filepath):
-        if "\\" in filepath:
-            only_folders = re.search(r".*(?=\\)", filepath).group()
+    ## init, in case
+    global workingDir
+    workingDir = os.getcwd()
+    ##
+    # loadConfig -> Global variable `config`
+    loadConfig()
+    createBaseRegexes()
 
-            if not os.path.exists(os.path.join(root,only_folders)):
-                if "\\" not in only_folders:
-                    current_folder = os.path.join(root,only_folders)
-                    if not os.path.exists(current_folder):
-                        os.mkdir(current_folder)
+    if debug:
+        ## Debug Overrides (TODO) - Just to note, it's here btw.
+        src_path, dst_path = loadPathPresets(n=1) 
+        # n=1 points to the debug directories
+        
+    elif not debug:
+        host, n = consoleInput()
+        src_path, dst_path = loadPathPresets(host=host, n=n) 
 
-                else:
-                    all_folders = re.findall(r'^.*?(?=\\)|(?<=\\).*?(?=\\)|(?<=\\).+$',only_folders)
-                    current_folder = root
+    ## Start timing.
+    global start_time
+    start_time = time.time()
 
-                    for folder in all_folders:
-                        current_folder = os.path.join(current_folder,folder)
-                        if not os.path.exists(current_folder):
-                            #print("CREATING "+current_folder)
-                            os.mkdir(current_folder)
+    ## TIME TO OS.WALK
+    # This is for finding which folders (roots) and
+    # files to copy or remove.
+    src_roots, src_files = checkDir(src_path)
 
-    def perfect_sync(src_file_path, dst_file_path):
-        #Needs a delete in dst if not in src function as well.
+    ## checks for -icfilehistory.pkl in dst (./)
+    dst_roots, dst_files = checkDir(dst_path)
+    if os.path.exists(os.path.join(dst_path, config["history filename"])):
+        del dst_files
+        dst_files = loadPickle(os.path.join(dst_path, config["history filename"]))
 
-        if os.path.exists(dst_file_path):
-            if not os.path.exists(src_file_path):
-                #untested lol
-                print("Removing [{}] from dst.".format(relative_path))
-                os.remove(dst_file_path)
+    roots_to_remove = []
+    roots_to_add = []
+    files_to_copy, files_to_remove = [], []
 
-            #print(f, str(os.stat(src_file_path).st_size), str(os.stat(dst_file_path).st_size))
-            elif os.stat(src_file_path).st_size != os.stat(dst_file_path).st_size:
-                print("Copying [{}] (Different File Sizes)".format(relative_path))
-                createallfolders(dst_path, relative_path)
-                shutil.copy(src_file_path, dst_file_path)
-                #os.remove(src_file_path) #WHY THE F IS THIS HERE?????
+    # folders to add to dst
+    for src_root in src_roots:
+        if src_root not in dst_roots:
+            roots_to_add.append(src_root)
+
+    # folders to remove from dst
+    for dst_root in dst_roots:
+        if dst_root not in src_roots:
+            roots_to_remove.append(dst_root)
+
+    # Files to copy/overwrite from src to dst.
+    for src_file in list(src_files):
+        if src_file in list(dst_files):
+            if src_files[src_file] == dst_files[src_file]:
+                continue
             else:
-                pass
+                files_to_copy.append(src_file)
         else:
-            print("Copying [{}]".format(relative_path))
-            createallfolders(dst_path, relative_path)
-            shutil.copy(src_file_path, dst_file_path)
+            files_to_copy.append(src_file)
 
-    #creating the 
-    options_text = ""
-    for i, option in enumerate(folder_options):
-        i += 1
-        options_text += "   {} - {}\n".format(i, option["name"])
-        ##
-
-    input1  = input("""Ice Canyon Syncer script.
-
-[Folders aren't explicitly synced right now btw, so please do that when you have the "energy" to do so.]
-
-Main Directory Options:
-{}
-If a manual entry is required, enter (n):
-
-[-d] to remove all files from dst.
-""".format(
-    options_text
-    ))
-    default_dir_options = False
-    try:
-        int(input1[:1])
-        if default_dir_options <= + len(folder_options):
-            default_dir_options = True
-        else:
-            pass
-    except:
-        pass
     
-    #actual dir shutfff
-    if default_dir_options:
-        if "-d" in input1:
-            remove_dst = True
-        else:
-            remove_dst = False
 
-        input1 = int(input1[:1])
+    # Files to remove from dst.
+    for dst_file in list(dst_files):
+        if dst_file not in list(src_files):
+            files_to_remove.append(dst_file)
 
-        src_path = folder_options[input1-1]["src"]
-        dst_path = folder_options[input1-1]["dst"]
+    # THis might be relegated to ultra-verbose.
+    ## A Bunch of printing code
+    # print("REMOVE FOLDERS", roots_to_remove)
+    # print("\n")
+    # print("ADD FOLDERS", dumpJson(roots_to_add))
+    # print("\n")
+    # print("COPY FILES", dumpJson(files_to_copy))
+    # print("\n")
+    # print("REMOVE FILES", dumpJson(files_to_remove))
 
-        ## Removing files from dst
-        if remove_dst:
-            print("Removing files from [{}].".format(dst_path))
-            for root, dirs, files in os.walk(dst_path):
-                for f in files:
-                    try:
-                        os.remove(os.path.join(root, f))
-                    except:
-                        pass
-    else:
-        src, dst  = False, False
-        while src == False:
-            src_path = input("Change source path: ")
-        
-            if not os.path.exists(src_path):
-                print("Source path is not valid. (Does not exist)")
-            else:
-                src = True
+    # print(len(files_to_copy))
+    # print(files_to_copy[980])
+    # print(files_to_copy[1562])
+    # print(files_to_copy[2766])
 
-        while dst == False:
-            dst_path = input("Change destination path: ")
-            
-            try:
-                if not os.path.exists(dst_path):
-                    os.mkdir(dst_path)
-                    print('Destination directory [{}] created'.format(dst_path))
-                dst = True
-            except:
-                print("Destination path is not valid.")
+    #### SYNCING TIME !
+    for root in roots_to_remove:
+        try:
+            # Remove folders
+            if not debug:
+                os.rmdir(os.path.join(dst_path, root))
 
-    if not os.path.exists(dst_path):
-        os.mkdir(dst_path)
-        print('Destination directory [{}] created.'.format(dst_path))
+            console.print("Removed folder: [gray]{}".format(root))
 
-    ##Actual copier code
-    print("""Syncing Ice Canyon Files...
-    From: [{}]
-    To: [{}]
-    
-Folders to be synced perfectly (if file sizes are different): {}
-Folders to be synced with addition of files to dst: {}
-""".format(
-    src_path, dst_path,
-    str(btf(perfect_sync_folders))[1:-1].replace("'",''), str(btf(add_sync_folders))[1:-1].replace("'",'')
-    ))
+        except Exception as err:
+            console.print(err, style="bold red")
+            input("Press enter to continue.")
 
+    for root in roots_to_add:
+        try:
+            # Add folders
+            if not debug:
+                createAllFolders(dst_path, root + "\\")
 
-    missing_folders = []
-    src_root_dir_list = os.listdir(src_path)
-    for folder in perfect_sync_folders + add_sync_folders:
-        
-        if folder not in src_root_dir_list and folder != 'root':
-            missing_folders.append(folder)
-        
-    if missing_folders != []:
-        print("Folders: "+ str(btf(missing_folders))[1:-1].replace("'",'') + " are not found in source directory.\n")
+            console.print("Created folder: [gray]{}".format(root))
 
+        except Exception as err:
+            console.print(err, style="bold red")
+            input("Press enter to continue.")
 
-    ignored_folders = []
-    for folder in src_root_dir_list:
-        folder_actual = re.search(r'\.[a-zA-Z]{2,4}',folder)
-        if folder_actual == None:
-            folder_actual = folder
-            if folder_actual not in perfect_sync_folders + add_sync_folders:
-                ignored_folders.append(folder_actual)
-        
-    if ignored_folders != []:
-        print("Folders: "+ str(btf(ignored_folders))[1:-1].replace("'",'') + " will not be synced.\n")
+    for file in files_to_copy:
+        try:
+            # Remove, then copies file.
+            if not debug:
+                full_dst_path, full_src_path = os.path.join(dst_path, file), os.path.join(src_path, file)
+                if os.path.exists(full_dst_path):
+                    os.remove(full_dst_path)
+                shutil.copy(full_src_path, full_dst_path)
 
-    for root, dirs, files in os.walk(src_path):
-        for f in files:
-            if f != "Thumbs.db":
-                src_file_path = os.path.join(root,f)
-                relative_path = src_file_path.replace(src_path,"")[1:]
-                dst_file_path = os.path.join(dst_path,relative_path)
+            console.print("Copied file: [gray]{}".format(file))
 
-                file_folder = re.search(r'.*?(?=\\)',relative_path)
-                if file_folder != None:
-                    
-                    file_folder = file_folder.group()
-                    #print(f, file_folder)
+        except Exception as err:
+            console.print(err, style="bold red")
+            input("Press enter to continue.")
 
-                    if file_folder in perfect_sync_folders:
-                        perfect_sync(src_file_path, dst_file_path)
+    for file in files_to_remove:
+        try:
+            # Removes files.
+            if not debug:
+                full_dst_path = os.path.join(dst_path, file) 
+                os.remove(full_dst_path)
 
-                    if file_folder in add_sync_folders:
-                        if not os.path.exists(dst_file_path):
-                            print("Copying [{}]".format(relative_path))
+            console.print("Removed file: [gray]{}".format(file))
 
-                            createallfolders(dst_path, relative_path)
-                            
-                            shutil.copy(src_file_path, dst_file_path)
+        except Exception as err:
+            console.print(err, style="bold red")
+            input("Press enter to continue.")
 
-                else:
-                    #print(f)
-                    if "root" in add_sync_folders:
-                        pass #NOT NEEDED, will never need
-                    elif "root" in perfect_sync_folders:
-                        perfect_sync(src_file_path, dst_file_path)
+    ## Creating -icfilehistory.pkl in dst (./)
+    # I think just dumping the src_files dict is fine, 
+    # seeing as it's supposed to be dst_files
+    if not debug:
+        writePickle(os.path.join(dst_path, config["history filename"]), data=src_files)
 
-    #removalcode
-    for root, dirs, files in os.walk(dst_path):
-        for f in files:
-            if f != "Thumbs.db":
-                dst_file_path = os.path.join(root,f)
-                relative_path = dst_file_path.replace(dst_path,"")[1:]
-                src_file_path = os.path.join(src_path,relative_path)
+    ### End of script
+    console.print("Time elapsed: {}".format(timeInSeconds(time.time() - start_time)))
 
-                file_folder = re.search(r'.*?(?=\\)',relative_path)
-                if file_folder != None:
-                    
-                    file_folder = file_folder.group()
-                    #print(f, file_folder)
-
-                    if file_folder in perfect_sync_folders:
-                        perfect_sync(src_file_path, dst_file_path)
-
-                else:
-                    if "root" in perfect_sync_folders:
-                        perfect_sync(src_file_path, dst_file_path)
-                    
+    if not debug:
+        input("Syncing complete. Press enter to close.")
 
 if __name__ == "__main__":
+    runThis() # Writes updated configs.
     main()
-    print(return_time_from_seconds(time.time() - start_time))
-    input("Syncing completed.")
+
+    
