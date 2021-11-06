@@ -58,7 +58,7 @@ def createBaseRegexes():
 
 def consoleInput():
     #host names and stuff
-    hostname = socket.gethostname()
+    hostname = socket.gethostname().lower()
     host = ""
     for options in config["hostnames"]:
         if re.search(options[0], hostname) != None:
@@ -221,7 +221,7 @@ def main():
         try:
             # Remove folders
             if not debug:
-                os.rmdir(os.path.join(dst_path, root))
+                shutil.rmtree(os.path.join(dst_path, root))
 
             console.print("Removed folder: [gray]{}".format(root))
 

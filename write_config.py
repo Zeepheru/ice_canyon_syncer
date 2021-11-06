@@ -8,8 +8,8 @@ config = {
     "filename": "config.pkl",
     "history filename": "-icfilehistory.pkl",
     "hostnames":[
-        (r'ZEEEE', "peg"),
-        (r'SANPEE', "uc")
+        (r'zeee', "peg"), #switched to lowercase
+        (r'sanpee', "uc")
     ],
     "paths":{
         "peg":[
