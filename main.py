@@ -1,4 +1,5 @@
 import os
+from pickle import FALSE
 import re
 import shutil
 import time
@@ -26,8 +27,10 @@ Primarily it's from
 """
 
 ## SETUP VARS !! 
-debug = False
+debug = FALSE
+autoPreset = False
 # Debug means disabling all OS operations: file and folder copying, history .pkl file creation
+# autoPreset means automatically selecting the path preset
 
 ## Stuff
 def loadConfig():
@@ -92,6 +95,8 @@ Destination: {}
     config["paths"][host][preset[1]],
     config["paths"][host][preset[2]]
     )
+
+    print("\n") # extra line, I know I can concatenate it but fuck off.
     print(presetText)
 
     max_n = len(config["path presets"][host])
@@ -148,12 +153,12 @@ def main():
     loadConfig()
     createBaseRegexes()
 
-    if debug:
+    if autoPreset:
         ## Debug Overrides (TODO) - Just to note, it's here btw.
         src_path, dst_path = loadPathPresets(n=1) 
         # n=1 points to the debug directories
         
-    elif not debug:
+    elif not autoPreset:
         host, n = consoleInput()
         src_path, dst_path = loadPathPresets(host=host, n=n) 
 
@@ -161,119 +166,129 @@ def main():
     global start_time
     start_time = time.time()
 
-    ## TIME TO OS.WALK
-    # This is for finding which folders (roots) and
-    # files to copy or remove.
-    src_roots, src_files = checkDir(src_path)
+    while True:
+        ## TIME TO OS.WALK
+        # This is for finding which folders (roots) and
+        # files to copy or remove.
 
-    ## checks for -icfilehistory.pkl in dst (./)
-    dst_roots, dst_files = checkDir(dst_path)
-    if os.path.exists(os.path.join(dst_path, config["history filename"])):
-        del dst_files
-        dst_files = loadPickle(os.path.join(dst_path, config["history filename"]))
+        ## check if source exists, will exit if does not.
+        if not os.path.exists(src_path):
+            console.print("Source path: {} does not exist.".format(src_path), style="red")
+            break
 
-    roots_to_remove = []
-    roots_to_add = []
-    files_to_copy, files_to_remove = {}, []
+        src_roots, src_files = checkDir(src_path)
 
-    # folders to add to dst
-    for src_root in src_roots:
-        if src_root not in dst_roots:
-            roots_to_add.append(src_root)
+        ## checks for -icfilehistory.pkl in dst (./)
+        dst_roots, dst_files = checkDir(dst_path)
 
-    # folders to remove from dst
-    for dst_root in dst_roots:
-        if dst_root not in src_roots:
-            roots_to_remove.append(dst_root)
+        if os.path.exists(os.path.join(dst_path, config["history filename"])):
+            del dst_files
+            dst_files = loadPickle(os.path.join(dst_path, config["history filename"]))
 
-    # Files to copy/overwrite from src to dst.
-    for src_file in list(src_files):
-        if src_file in list(dst_files):
-            if src_files[src_file][0] == dst_files[src_file][0]:
-                continue
+        roots_to_remove = []
+        roots_to_add = []
+        files_to_copy, files_to_remove = {}, []
+
+        # folders to add to dst
+        for src_root in src_roots:
+            if src_root not in dst_roots:
+                roots_to_add.append(src_root)
+
+        # folders to remove from dst
+        for dst_root in dst_roots:
+            if dst_root not in src_roots:
+                roots_to_remove.append(dst_root)
+
+        # Files to copy/overwrite from src to dst.
+        for src_file in list(src_files):
+            if src_file in list(dst_files):
+                if src_files[src_file][0] == dst_files[src_file][0]:
+                    continue
+                else:
+                    files_to_copy[src_file] = byteConverter(src_files[src_file][1])
             else:
                 files_to_copy[src_file] = byteConverter(src_files[src_file][1])
-        else:
-            files_to_copy[src_file] = byteConverter(src_files[src_file][1])
 
-    # Files to remove from dst.
-    for dst_file in list(dst_files):
-        if dst_file not in list(src_files):
-            files_to_remove.append(dst_file)
+        # Files to remove from dst.
+        for dst_file in list(dst_files):
+            if dst_file not in list(src_files):
+                files_to_remove.append(dst_file)
 
-    # THis might be relegated to ultra-verbose.
-    ## A Bunch of printing code
-    # print("REMOVE FOLDERS", roots_to_remove)
-    # print("\n")
-    # print("ADD FOLDERS", dumpJson(roots_to_add))
-    # print("\n")
-    # print("COPY FILES", dumpJson(files_to_copy))
-    # print("\n")
-    # print("REMOVE FILES", dumpJson(files_to_remove))
+        # THis might be relegated to ultra-verbose.
+        ## A Bunch of printing code
+        # print("REMOVE FOLDERS", roots_to_remove)
+        # print("\n")
+        # print("ADD FOLDERS", dumpJson(roots_to_add))
+        # print("\n")
+        # print("COPY FILES", dumpJson(files_to_copy))
+        # print("\n")
+        # print("REMOVE FILES", dumpJson(files_to_remove))
 
-    # print(len(files_to_copy))
-    # print(files_to_copy[980])
-    # print(files_to_copy[1562])
-    # print(files_to_copy[2766])
+        # print(len(files_to_copy))
+        # print(files_to_copy[980])
+        # print(files_to_copy[1562])
+        # print(files_to_copy[2766])
 
-    #### SYNCING TIME !
-    for root in roots_to_remove:
-        try:
-            # Remove folders
-            if not debug:
-                shutil.rmtree(os.path.join(dst_path, root))
+        #### SYNCING TIME !
+        for root in roots_to_remove:
+            try:
+                # Remove folders
+                if not debug:
+                    shutil.rmtree(os.path.join(dst_path, root))
 
-            console.print("Removed folder: [gray]{}".format(root))
+                console.print("Removed folder: [gray]{}".format(root))
 
-        except Exception as err:
-            console.print(err, style="bold red")
-            input("Press enter to continue.")
+            except Exception as err:
+                console.print(err, style="bold red")
+                input("Press enter to continue.")
 
-    for root in roots_to_add:
-        try:
-            # Add folders
-            if not debug:
-                createAllFolders(dst_path, root + "\\")
+        for root in roots_to_add:
+            try:
+                # Add folders
+                if not debug:
+                    createAllFolders(dst_path, root + "\\")
 
-            console.print("Created folder: [gray]{}".format(root))
+                console.print("Created folder: [gray]{}".format(root))
 
-        except Exception as err:
-            console.print(err, style="bold red")
-            input("Press enter to continue.")
+            except Exception as err:
+                console.print(err, style="bold red")
+                input("Press enter to continue.")
 
-    for file in list(files_to_copy):
-        try:
-            # Remove, then copies file.
-            if not debug:
-                full_dst_path, full_src_path = os.path.join(dst_path, file), os.path.join(src_path, file)
-                if os.path.exists(full_dst_path):
+        for file in list(files_to_copy):
+            try:
+                # Remove, then copies file.
+                if not debug:
+                    full_dst_path, full_src_path = os.path.join(dst_path, file), os.path.join(src_path, file)
+                    if os.path.exists(full_dst_path):
+                        os.remove(full_dst_path)
+                    shutil.copy(full_src_path, full_dst_path)
+
+                console.print("Copied file: [gray]{}   [{}]".format(file, files_to_copy[file]))
+
+            except Exception as err:
+                console.print(err, style="bold red")
+                input("Press enter to continue.")
+
+        for file in files_to_remove:
+            try:
+                # Removes files.
+                if not debug:
+                    full_dst_path = os.path.join(dst_path, file) 
                     os.remove(full_dst_path)
-                shutil.copy(full_src_path, full_dst_path)
 
-            console.print("Copied file: [gray]{}   [{}]".format(file, files_to_copy[file]))
+                console.print("Removed file: [gray]{}".format(file))
 
-        except Exception as err:
-            console.print(err, style="bold red")
-            input("Press enter to continue.")
+            except Exception as err:
+                console.print(err, style="bold red")
+                input("Press enter to continue.")
 
-    for file in files_to_remove:
-        try:
-            # Removes files.
-            if not debug:
-                full_dst_path = os.path.join(dst_path, file) 
-                os.remove(full_dst_path)
+        ## Creating -icfilehistory.pkl in dst (./)
+        # I think just dumping the src_files dict is fine, 
+        # seeing as it's supposed to be dst_files
+        if not debug:
+            writePickle(os.path.join(dst_path, config["history filename"]), data=src_files)
 
-            console.print("Removed file: [gray]{}".format(file))
-
-        except Exception as err:
-            console.print(err, style="bold red")
-            input("Press enter to continue.")
-
-    ## Creating -icfilehistory.pkl in dst (./)
-    # I think just dumping the src_files dict is fine, 
-    # seeing as it's supposed to be dst_files
-    if not debug:
-        writePickle(os.path.join(dst_path, config["history filename"]), data=src_files)
+        break # normal code breaking (ending)
 
     ### End of script
     console.print("\nTime elapsed: {}".format(timeInSeconds(time.time() - start_time)))
