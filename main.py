@@ -1,5 +1,4 @@
 import os
-from pickle import FALSE
 import re
 import shutil
 import time
@@ -27,7 +26,7 @@ Primarily it's from
 """
 
 ## SETUP VARS !! 
-debug = FALSE
+debug = False
 autoPreset = False
 # Debug means disabling all OS operations: file and folder copying, history .pkl file creation
 # autoPreset means automatically selecting the path preset
@@ -240,7 +239,7 @@ def main():
 
             except Exception as err:
                 console.print(err, style="bold red")
-                input("Press enter to continue.")
+                # input("Press enter to continue.")
 
         for root in roots_to_add:
             try:
@@ -252,7 +251,7 @@ def main():
 
             except Exception as err:
                 console.print(err, style="bold red")
-                input("Press enter to continue.")
+                # input("Press enter to continue.")
 
         for file in list(files_to_copy):
             try:
@@ -267,7 +266,7 @@ def main():
 
             except Exception as err:
                 console.print(err, style="bold red")
-                input("Press enter to continue.")
+                # input("Press enter to continue.")
 
         for file in files_to_remove:
             try:
@@ -280,7 +279,7 @@ def main():
 
             except Exception as err:
                 console.print(err, style="bold red")
-                input("Press enter to continue.")
+                # input("Press enter to continue.")
 
         ## Creating -icfilehistory.pkl in dst (./)
         # I think just dumping the src_files dict is fine, 
