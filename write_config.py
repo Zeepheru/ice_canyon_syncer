@@ -6,7 +6,7 @@ config = {
 """
 """,
     "filename": "config.pkl",
-    "history filename": "- icfilehistory.pkl",
+    "history filename": "-_icfilehistory.pkl",
     "hostnames":[
         (r'zeee', "peg"), #switched to lowercase
         (r'sanpee', "uc")
