@@ -33,6 +33,10 @@ autoPreset = False
 
 ## Stuff
 def loadConfig():
+    """
+    Loading the code config
+
+    """
     global config
     config = loadPickle(r'config.pkl') 
 
@@ -113,27 +117,27 @@ Destination: {}
 
 def checkDir(folder_path):
     # NO longer a "check" function lmao.
-    # The darker blue syntax highlighting is nice, I'll just keep that. :-P
+    
 
-    ROOTS = []
-    FILES = {}
+    roots = []
+    a_files = {}
     for root, dirs, files in os.walk(folder_path):
         root_relative = root.replace(folder_path,"")[1:]
         if ignored_folders_regex.search(root_relative) != None:
             # Ignoring ignored folders
             continue
-        ROOTS.append(root_relative)
+        roots.append(root_relative)
         # maybe do a ROOT CHECK FIRST?
 
-        for f in files:
+        for f in a_files:
             if ignored_files_regex.search(f) != None:
                 # ignoring ignored files
                 continue
             filepath = os.path.join(root, f)
-            FILES[filepath.replace(folder_path,"")[1:]] = (os.path.getmtime(filepath), os.stat(filepath).st_size)
+            files[filepath.replace(folder_path,"")[1:]] = (os.path.getmtime(filepath), os.stat(filepath).st_size)
             # for the file tuple: (time of creation, size in bytes)
 
-    return ROOTS, FILES
+    return roots, a_files
 
 def main():
     ## For Rich
