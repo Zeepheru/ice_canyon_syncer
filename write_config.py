@@ -10,6 +10,7 @@ config = {
     "hostnames":[
         (r'zeee', "peg"), #switched to lowercase
         (r'sanpee', "uc")
+        (r'', "lp")
     ],
     "paths":{
         "peg":[
@@ -22,6 +23,10 @@ config = {
             r'G:\Ice Canyon (Thumbdrive Version)',
             r'I:\Backup\Pony\MLP\Ice Canyon Backup',
             r'P:\MLP\Ice Canyon Backup'
+        ],
+        "lp":[
+            r'C:\Projects\Ice Canyon',
+            r'D:\Ice Canyon (Thumbdrive Version)', # should be D:\
         ]
     },
     "path presets":{
@@ -34,6 +39,10 @@ config = {
         "uc":[
             ("Default: IC External - UC IC", 0, 1),
             ("UC IC - UC Brownie", 1, 2)
+        ],
+        "lp":[
+            ("Default: lp IC - IC External", 0, 1),
+            ("IC External - lp IC", 1, 0)
         ]
     },
     "ignored folders":r'^IC-Anchorage Testing|^Videos|^Frostbite',

@@ -79,8 +79,10 @@ def consoleInput():
                 host = "uc"
                 break
             else:
-                "Please try again."
+                print("CURRENTLY THIS MAY BE A RESULT OF NO CONFIG ADDED. PLEASE ADD CONFIG TO write_config.py")
+                print("Please try again.")
     print("Host PC has been identified as '{}'.".format(host))
+
     
     ## showing the options for presets
     presetText = """"""
