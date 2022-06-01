@@ -9,7 +9,7 @@ config = {
     "history filename": "-_icfilehistory.pkl",
     "hostnames":[
         (r'zeee', "peg"), #switched to lowercase
-        (r'sanpee', "uc")
+        (r'sanpee', "uc"),
         (r'', "lp")
     ],
     "paths":{
